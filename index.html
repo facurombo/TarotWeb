@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Oráculo</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>Oráculo de Tarot</h1>
+            <p id="subtitle">Es importante tu concentracion en este momento.</p>
+            <p> <strong>Respira</strong> e ingresa la siguiente informacion siendo consciente.</p>
+            <p id="subtitle">Lo que escribas mezclara las cartas del mazo de una manera diferente.</p>
+        </header>
+
+        <!-- ESTADO 1: CONFIGURACIÓN INICIAL -->
+        <div id="initial-setup">
+            <div class="user-inputs">
+                <input type="text" id="user-name" placeholder="1. Ingresa tu nombre">
+                <input type="text" id="initial-question" placeholder="2. Ingresa tu pregunta ">
+                <input type="text" id="seed-text" placeholder="3. Ingresa un numero">
+                <div class="card-count-input-container">
+                    <input type="number" id="card-count" value="3" min="1" max="10">
+                    <label for="card-count">Cartas por tirada</label>
+                </div>
+            </div>
+            <button id="shuffle-button">Mezclar Mazo</button>
+        </div>
+
+        <!-- ESTADO 2: RONDA ACTIVA -->
+        <div id="round-container" class="hidden">
+            <div id="question-step">
+                <p id="question-counter-text"></p>
+                <input type="text" id="next-question" placeholder="Escribe tu siguiente pregunta">
+                <button id="ask-button">Hacer siguiente pregunta</button>
+            </div>
+
+            <div id="selected-cards-container"></div>
+
+            <div id="selection-step" class="hidden">
+                <p id="selection-prompt">Selecciona <span id="selection-count"></span> carta(s) del mazo.</p>
+                <div id="facedown-cards-container"></div>
+            </div>
+        </div>
+
+        <!-- Contenedor para mostrar las cartas seleccionadas y la interpretación -->
+        <div id="results-container"></div>
+        <div id="loader" class="loader hidden"></div>
+
+        <footer>
+        </footer>
+    </div>
+    <audio id="background-music" src="Music/Meditacion.mp3" loop></audio>
+    <button id="mute-button">🔇</button>
+    <script src="script.js"></script>
+</body>
+</html>
