@@ -128,7 +128,7 @@
     }
 
     // --- API & Deck Config ---
-    const GEMINI_API_KEY = 'AIzaSyDE2UN-_UBFEGnFaCJywyWAwaklzqyUEdA'; // ¡REEMPLAZAR!
+    const GEMINI_API_KEY = 'AIzaSyCHAQ8vpn6gmMsfqHaoDlqPaGsxzgOm1oc'; // ¡REEMPLAZAR!
     const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
     const fullDeck = [
         'El Loco', 'El Mago', 'La Sacerdotisa', 'La Emperatriz', 'El Emperador', 'El Sumo Sacerdote',
