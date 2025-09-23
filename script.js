@@ -400,10 +400,10 @@ ${summaries || 'Sin datos (esta es la primera tirada de la ronda)'}
 Recursos/consejos ya sugeridos (NO repetir): ${usedResourcesList}
 
 Instrucciones de estilo:
-1) EXACTAMENTE 4 párrafos, sin viñetas ni listas, sin emojis.
-2) Usa las cartas para tejer una narrativa cohesionada.
-3) Manten consistencia con lo ya conversado y evita redundancias.
-4) Cierra con acciones concretas o recursos NUEVOS (máx. 3).
+1) No des una interpretacion sesgada, explica lo que representa cada carta y luego buscale como puede estar relacionada esa carta con la pregunta.
+2) Manten consistencia con lo ya conversado y evita redundancias.
+3) no escribas mas de 5 parrafos.
+
 
 Agrega este bloque oculto al final para memoria (no lo muestres al usuario):
 
@@ -430,7 +430,7 @@ Agrega este bloque oculto al final para memoria (no lo muestres al usuario):
             return data?.candidates?.[0]?.content?.parts?.[0]?.text || 'No hay respuesta del oraculo.';
         } catch (error) {
             console.error('Error al contactar al oraculo:', error);
-            return 'El oraculo no puede responder. Revisa la consola (F12) y tu API Key.';
+            return 'El oraculo no puede responder.';
         }
     }
 
