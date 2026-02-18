@@ -4,7 +4,7 @@
     let deckPosition = 0;
     let questionsAsked = 0;
     let cardsToSelect = 0;
-    let selectedCards = [];
+    let selectedCards = []; // [{ name, reversed }]
     let isSelectionPhase = false;
     let currentQuestion = '';
 
@@ -128,8 +128,40 @@
     }
 
     // --- API & Deck Config ---
-    const GEMINI_API_KEY = 'AIzaSyCHAQ8vpn6gmMsfqHaoDlqPaGsxzgOm1oc'; // ¡REEMPLAZAR!
+    const GEMINI_API_KEY = 'AIzaSyDmL6BcF6AzLvGm16UYzCjNgEBXEaxL7s0'; // ¡REEMPLAZAR!
     const API_URL = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent';
+    const DESKTOP_CARDS_PER_SELECTION = 21;
+    const MOBILE_CARDS_PER_SELECTION = 25;
+    const DESKTOP_MIN_WIDTH = 900;
+
+    function getCardsPerSelection() {
+        return window.innerWidth >= DESKTOP_MIN_WIDTH ? DESKTOP_CARDS_PER_SELECTION : MOBILE_CARDS_PER_SELECTION;
+    }
+    const CARD_IMAGE_BASE = 'https://commons.wikimedia.org/wiki/Special:FilePath/';
+    const MAJOR_IMAGE_MAP = {
+        'El Loco': 'RWS Tarot 00 Fool.jpg',
+        'El Mago': 'RWS Tarot 01 Magician.jpg',
+        'La Sacerdotisa': 'RWS Tarot 02 High Priestess.jpg',
+        'La Emperatriz': 'RWS Tarot 03 Empress.jpg',
+        'El Emperador': 'RWS Tarot 04 Emperor.jpg',
+        'El Sumo Sacerdote': 'RWS Tarot 05 Hierophant.jpg',
+        'Los Enamorados': 'RWS Tarot 06 Lovers.jpg',
+        'El Carro': 'RWS Tarot 07 Chariot.jpg',
+        'La Justicia': 'RWS Tarot 11 Justice.jpg',
+        'El Ermitaño': 'RWS Tarot 09 Hermit.jpg',
+        'La Rueda de la Fortuna': 'RWS Tarot 10 Wheel of Fortune.jpg',
+        'La Fuerza': 'RWS Tarot 08 Strength.jpg',
+        'El Colgado': 'RWS Tarot 12 Hanged Man.jpg',
+        'La Muerte': 'RWS Tarot 13 Death.jpg',
+        'La Templanza': 'RWS Tarot 14 Temperance.jpg',
+        'El Diablo': 'RWS Tarot 15 Devil.jpg',
+        'La Torre': 'RWS Tarot 16 Tower.jpg',
+        'La Estrella': 'RWS Tarot 17 Star.jpg',
+        'La Luna': 'RWS Tarot 18 Moon.jpg',
+        'El Sol': 'RWS Tarot 19 Sun.jpg',
+        'El Juicio': 'RWS Tarot 20 Judgement.jpg',
+        'El Mundo': 'RWS Tarot 21 World.jpg'
+    };
     const fullDeck = [
         'El Loco', 'El Mago', 'La Sacerdotisa', 'La Emperatriz', 'El Emperador', 'El Sumo Sacerdote',
         'Los Enamorados', 'El Carro', 'La Justicia', 'El Ermitaño', 'La Rueda de la Fortuna',
@@ -172,6 +204,38 @@
             [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
         }
         return newArray;
+    }
+
+    function getCardImageUrl(cardName) {
+        if (MAJOR_IMAGE_MAP[cardName]) {
+            return CARD_IMAGE_BASE + encodeURIComponent(MAJOR_IMAGE_MAP[cardName]);
+        }
+
+        const minorMatch = cardName.match(/^(As|[2-9]|10|Sota|Caballo|Reina|Rey) de (Bastos|Copas|Espadas|Oros)$/);
+        if (!minorMatch) return '';
+
+        const rank = minorMatch[1];
+        const suit = minorMatch[2];
+        const suitMap = {
+            Bastos: 'Wands',
+            Copas: 'Cups',
+            Espadas: 'Swords',
+            Oros: 'Pents'
+        };
+        const rankMap = {
+            As: '01',
+            Sota: '11',
+            Caballo: '12',
+            Reina: '13',
+            Rey: '14'
+        };
+
+        const suitCode = suitMap[suit];
+        const rankCode = rankMap[rank] || String(rank).padStart(2, '0');
+        if (!suitCode || !rankCode) return '';
+
+        const fileName = `${suitCode}${rankCode}.jpg`;
+        return CARD_IMAGE_BASE + encodeURIComponent(fileName);
     }
 
     // --- Helpers de memoria/parseo ---
@@ -240,7 +304,8 @@
             selectedCardsContainer.innerHTML = '';
             updateQuestionCounter();
 
-            if ((currentDeck.length - deckPosition) < 21) {
+            const cardsPerSelection = getCardsPerSelection();
+            if ((currentDeck.length - deckPosition) < cardsPerSelection) {
                 alert('No quedan suficientes cartas. Mezcla de nuevo.');
                 initialSetup.classList.remove('hidden');
                 roundContainer.classList.add('hidden');
@@ -276,7 +341,8 @@
             currentQuestion = nextQuestion;
             nextQuestionInput.value = '';
 
-            if ((currentDeck.length - deckPosition) < 21) {
+            const cardsPerSelection = getCardsPerSelection();
+            if ((currentDeck.length - deckPosition) < cardsPerSelection) {
                 alert('No quedan suficientes cartas en el mazo para otra tirada.');
                 return;
             }
@@ -298,7 +364,8 @@
 
     function displayFaceDownCards() {
         facedownCardsContainer.innerHTML = '';
-        const cardsForSelection = currentDeck.slice(deckPosition, deckPosition + 21);
+        const cardsPerSelection = getCardsPerSelection();
+        const cardsForSelection = currentDeck.slice(deckPosition, deckPosition + cardsPerSelection);
 
         cardsForSelection.forEach((cardName, index) => {
             const cardElement = document.createElement('div');
@@ -323,10 +390,36 @@
 
         const revealedCard = document.createElement('div');
         revealedCard.classList.add('card-revealed');
-        revealedCard.textContent = cardName;
+        const isReversed = Math.random() < 0.5;
+        const displayName = cardName;
+        const imgUrl = getCardImageUrl(cardName);
+        const label = document.createElement('div');
+        label.classList.add('card-label');
+        const title = document.createElement('div');
+        title.classList.add('card-label-title');
+        title.textContent = displayName;
+        label.appendChild(title);
+        if (isReversed) {
+            const sub = document.createElement('div');
+            sub.classList.add('card-label-sub');
+            sub.textContent = '(invertida)';
+            label.appendChild(sub);
+        }
+        revealedCard.appendChild(label);
+        if (imgUrl) {
+            const img = document.createElement('img');
+            img.src = imgUrl;
+            img.alt = cardName;
+            img.loading = 'lazy';
+            img.addEventListener('error', () => img.remove());
+            if (isReversed) {
+                img.classList.add('reversed');
+            }
+            revealedCard.appendChild(img);
+        }
         selectedCardsContainer.appendChild(revealedCard);
 
-        selectedCards.push(cardName);
+        selectedCards.push({ name: cardName, reversed: isReversed });
 
         if (selectedCards.length === cardsToSelect) {
             isSelectionPhase = false;
@@ -350,7 +443,7 @@
             resources.forEach(r => sessionMemory.usedResources.add(r));
             sessionMemory.history.push({
                 question: currentQuestion,
-                cards: [...selectedCards],
+                cards: selectedCards.map(c => (c.reversed ? `${c.name} (invertida)` : c.name)),
                 summary: meta.resumen_breve || '',
                 resources
             });
@@ -359,13 +452,30 @@
         loader.classList.add('hidden');
 
         const resultBlock = document.createElement('div');
-        resultBlock.innerHTML = `<h3>Tirada ${questionsAsked + 1}</h3><div class="interpretation-block">${cleanText}</div>`;
+        const cardsHtml = selectedCards.map(card => {
+            const invertedTag = card.reversed ? `<span class="card-label-sub">(invertida)</span>` : '';
+            return `
+                <div class="result-card">
+                    <div class="card-label">
+                        <span class="card-label-title">${card.name}</span>
+                        ${invertedTag}
+                    </div>
+                </div>
+            `;
+        }).join('');
+        resultBlock.innerHTML = `
+            <h3>Tirada ${questionsAsked + 1}</h3>
+            <div class="question-block"><strong>Pregunta:</strong> ${currentQuestion}</div>
+            <div class="cards-block"><strong>Cartas:</strong></div>
+            <div class="result-cards">${cardsHtml}</div>
+            <div class="interpretation-block">${cleanText}</div>
+        `;
         resultsContainer.prepend(resultBlock);
 
         questionsAsked++;
         updateQuestionCounter();
 
-        deckPosition += 21;
+        deckPosition += getCardsPerSelection();
 
         if (questionsAsked >= 3) {
             lockSessionForToday();
@@ -383,7 +493,7 @@
     }
 
     async function getInterpretation(userName, userQuestion, cards) {
-        const cardList = cards.join(', ');
+        const cardList = cards.map(c => (c.reversed ? `${c.name} (invertida)` : c.name)).join(', ');
         const { summaries, usedResourcesList } = getPreviousContext();
 
         const prompt = `
@@ -402,7 +512,7 @@ Recursos/consejos ya sugeridos (NO repetir): ${usedResourcesList}
 Instrucciones de estilo:
 1) No des una interpretacion sesgada, explica lo que representa cada carta y luego buscale como puede estar relacionada esa carta con la pregunta.
 2) Manten consistencia con lo ya conversado y evita redundancias.
-3) no escribas mas de 5 parrafos.
+3) no escribas mas de 4 parrafos.
 
 
 Agrega este bloque oculto al final para memoria (no lo muestres al usuario):
