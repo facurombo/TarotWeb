@@ -131,16 +131,15 @@ button:disabled {
 }
 
 #facedown-cards-container {
-    display: flex;
-    flex-wrap: nowrap;
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
     gap: 10px;
     margin-top: 20px;
     max-width: 100%;
     margin-left: auto;
     margin-right: auto;
-    overflow-x: auto;
     padding-bottom: 8px;
-    justify-content: flex-start;
+    justify-content: center;
 }
 
 .card-facedown {
@@ -249,9 +248,8 @@ button:disabled {
         display: grid;
         grid-template-columns: repeat(7, 1fr);
         gap: 10px;
-        overflow-x: visible;
         padding-bottom: 0;
-        max-width: 780px;
+        max-width: 840px;
     }
 
     .card-facedown {
